@@ -8,12 +8,24 @@ PerspectiveCamera {
     height 800
 }
 
+Lights {
+    numLights 2
+    DirectionalLight {
+        direction -0.5 -0.5 -1
+        color 0.5 0.5 0.5 
+    }
+    PointLight {
+      position 50 60 70
+      color 12 12 12
+    }
+}
+
 Background {
     color 0 0 0 
 }
     
 Materials {
-    numMaterials 7
+    numMaterials 8
     Material { 
         color 0.75 0.25 0.25
         type 1 0 0
@@ -44,10 +56,14 @@ Materials {
         emission 30 30 30
         type 1 0 0
     }
+    Material {
+        color 0 0 0
+        type 1 0 0
+    }
 }
 
 Group {
-    numObjects 7
+    numObjects 9
     MaterialIndex 0
     Plane {
         normal 1 0 0
@@ -63,7 +79,7 @@ Group {
         normal 0 0 1
         offset 0
     }
-    MaterialIndex 2
+    MaterialIndex 7
     Plane {
         normal 0 0 -1
         offset -300
@@ -78,9 +94,19 @@ Group {
         normal 0 -1 0
         offset -81.6
     }
+    MaterialIndex 4
+    Sphere {
+    center 27 16.5 47
+        radius 13.5
+    }
     MaterialIndex 6
     Sphere {
     center 50 681.33 81.6
-        radius 599.8
+        radius 600
+    }
+    MaterialIndex 5
+    Sphere {
+    center 73 16.5 100
+        radius 13.5
     }
 }

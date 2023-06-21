@@ -29,8 +29,8 @@ inline float ReLU(float x)
                              : x;
 }
 inline float toFloat(float x) { return float(int(pow(ReLU(x), 1 / 2.2) * 255 + .5)) / 255.0; }
-inline double clamp(double x) { return x < 0 ? 0 : x > 1 ? 1
-                                                         : x; }
+inline float clamp(float x) { return x < 0 ? 0 : x > 1 ? 1
+                                                       : x; }
 
 Vector3f radiance(const Ray &r, int depth, Group *basegroup)
 {
@@ -47,9 +47,9 @@ Vector3f radiance(const Ray &r, int depth, Group *basegroup)
     //     return material->emission;
 
     Vector3f x = r.getDirection().normalized() * hit.getT() + r.getOrigin(), n = hit.getNormal().normalized(), nl = n.dot(r.getDirection().normalized(), n) < 0 ? n : n * (-1), f = hit.getMaterial()->getColor();
-    double p = f.x() > f.y() && f.x() > f.z() ? f.x() : f.y() > f.z() ? f.y()
-                                                                      : f.z(); // max refl
-    p = p < 0.75 ? p : 0.75;
+    float p = f.x() > f.y() && f.x() > f.z() ? f.x() : f.y() > f.z() ? f.y()
+                                                                     : f.z(); // max refl
+    //p = p < 0.75 ? p : 0.75;
 
     if (++depth > 5)
     {
@@ -68,7 +68,7 @@ Vector3f radiance(const Ray &r, int depth, Group *basegroup)
     float b = Vector3f::dot(ray_direction, hit_normal);
     if (material->type.x() == 1)
     { // 漫反射
-        double r1 = 2 * M_PI * RND2, r2 = RND2, r2s = sqrt(r2);
+        float r1 = 2 * 3.14159265 * RND2, r2 = RND2, r2s = sqrt(r2);
         Vector3f w = nl, u = (Vector3f::cross((fabs(w.x()) > .1 ? Vector3f(0, 1, 0) : Vector3f(1, 0, 0)), w)).normalized(), v = Vector3f::cross(w, u);
         Vector3f d = (u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2)).normalized();
 
@@ -87,12 +87,12 @@ Vector3f radiance(const Ray &r, int depth, Group *basegroup)
     { // 折射
         Ray reflray(next_origin, ray_direction - n * (2 * b));
         bool into = n.dot(nl, n) > 0;
-        double nc = 1, nt = 1.5, nnt = into ? nc / nt : nt / nc, ddn = ray_direction.dot(nl, ray_direction), cos2t;
+        float nc = 1, nt = 1.5, nnt = into ? nc / nt : nt / nc, ddn = ray_direction.dot(nl, ray_direction), cos2t;
         if ((cos2t = 1 - nnt * nnt * (1 - ddn * ddn)) < 0) // Total internal reflection
             return material->emission + f * radiance(reflray, depth, basegroup);
         Vector3f tdir = (ray_direction * nnt - n * ((into ? 1 : -1) * (ddn * nnt + sqrt(cos2t)))).normalized();
-        double a = nt - nc, b = nt + nc, R0 = a * a / (b * b), c = 1 - (into ? -ddn : tdir.dot(n, tdir));
-        double Re = R0 + (1 - R0) * c * c * c * c * c, Tr = 1 - Re, P = .25 + .5 * Re, RP = Re / P, TP = Tr / (1 - P);
+        float a = nt - nc, b = nt + nc, R0 = a * a / (b * b), c = 1 - (into ? -ddn : tdir.dot(n, tdir));
+        float Re = R0 + (1 - R0) * c * c * c * c * c, Tr = 1 - Re, P = .25 + .5 * Re, RP = Re / P, TP = Tr / (1 - P);
         return material->emission + f * (depth > 2 ? (RND2 < P ? // Russian roulette
                                                           radiance(reflray, depth, basegroup) * RP
                                                                : radiance(Ray(x, tdir), depth, basegroup) * TP)
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
     Camera *camera = sceneparser.getCamera();
     Image Img(camera->getWidth(), camera->getHeight());
     Group *baseGroup = sceneparser.getGroup();
-    int samps = 10;
+    int samps = 20;
     int w = camera->getWidth();
     int h = camera->getHeight();
 #pragma omp parallel for schedule(dynamic, 1) // OpenMP
@@ -176,19 +176,16 @@ int main(int argc, char *argv[])
             { // 2x2 subpixel rows
                 for (int sx = 0; sx < 2; sx++)
                 { // 2x2 subpixel cols
-                    double r1 = 2 * RND1, dx = r1 < 1 ? sqrt(r1) - 1 : 1 - sqrt(2 - r1);
-                    double r2 = 2 * RND1, dy = r2 < 1 ? sqrt(r2) - 1 : 1 - sqrt(2 - r2);
-                    int x1 = (((sx + .5 + dx) / 2 + x) / w - .5), y1 = (((sy + .5 + dy) / 2 + y) / h - .5);
                     for (int s = 0; s < samps; ++s)
                     {
-                        Ray camRay = sceneparser.getCamera()->generateRay(Vector2f(x + x1, y + y1));
+                        Ray camRay = sceneparser.getCamera()->generateRay(Vector2f(x + RND1, y + RND1));
                         r = r + radiance(camRay, 0, baseGroup) * (1. / samps) / 4;
                         // r = ptColor(camRay, sceneparser);
                         // cout << r.x() << " " << r.y() << " " << r.z() << std::endl;
                     }
                 }
             }
-            Img.SetPixel(x, y, Vector3f(clamp(toFloat(r.x())), clamp(toFloat(r.y())), clamp(toFloat(r.z()))));
+            Img.SetPixel(x, y, Vector3f(toFloat(clamp(r.x())),toFloat(clamp(r.y())), toFloat(clamp(r.z()))));
         } // Camera rays are pushed ^^^^^ forward to start in interior
     }
     Img.SaveImage(outputFile.c_str());
