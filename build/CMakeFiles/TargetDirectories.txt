@@ -1,0 +1,6 @@
+/home/yangjunx/basic_grapgical/hw/code/jt_lighting/build/CMakeFiles/rebuild_cache.dir
+/home/yangjunx/basic_grapgical/hw/code/jt_lighting/build/CMakeFiles/edit_cache.dir
+/home/yangjunx/basic_grapgical/hw/code/jt_lighting/build/CMakeFiles/PA1.dir
+/home/yangjunx/basic_grapgical/hw/code/jt_lighting/build/deps/vecmath/CMakeFiles/rebuild_cache.dir
+/home/yangjunx/basic_grapgical/hw/code/jt_lighting/build/deps/vecmath/CMakeFiles/edit_cache.dir
+/home/yangjunx/basic_grapgical/hw/code/jt_lighting/build/deps/vecmath/CMakeFiles/vecmath.dir
